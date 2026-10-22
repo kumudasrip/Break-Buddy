@@ -1,0 +1,22 @@
+{
+  "personality": "sarcastic friend",
+  "active_from": "09:00",
+  "active_to": "20:00",
+  "reminders": [
+    {
+      "name": "Water",
+      "every_min": 45,
+      "task": "drink water"
+    },
+    {
+      "name": "Eyes",
+      "every_min": 20,
+      "task": "rest my eyes"
+    },
+    {
+      "name": "Stretch",
+      "every_min": 60,
+      "task": "stretch"
+    }
+  ]
+}
