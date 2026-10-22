@@ -4,11 +4,15 @@
 
 Built for the **Hacktoberfest 2026 Open-Source AI Challenge, Week 3: "Slow and Steady"**
 
-<!-- Add a screenshot of the popup here:  ![Break Buddy popup](docs/popup.png) -->
-
-![The hero sprite](hero_preview.png)
-
-> The hero is an original character, drawn entirely by Python code (`make_sprite.py`). There are no image files to download.
+ <table>
+  <tr>
+    <td><img src="https://github.com/user-attachments/assets/0ba32f94-4482-4f15-b99c-0e4f9a235b93" width="400"></td>
+    <td><img src="https://github.com/user-attachments/assets/f953600a-c96a-4a54-b482-96aab6652c47" width="400"></td>
+  </tr>
+  <tr>
+    <td colspan="2" align="center"><img src="https://github.com/user-attachments/assets/43998e8e-3f52-4176-846f-47a614aeb1d1" width="500"></td>
+  </tr>
+</table> 
 
 ---
 
@@ -186,7 +190,7 @@ DEV post:
 
 - [Ollama](https://ollama.com) for running models locally
 - [Gemma](https://ai.google.dev/gemma), Google's open-weight model family
-- Built for the [Hacktoberfest 2026 Open-Source AI Challenge](https://dev.to) on DEV
+- Built for the [Hacktoberfest 2026 Open-Source AI Challenge](https://dev.to/challenges/hacktoberfest-week3-2026-10-19) on DEV
 
 ## License
 
