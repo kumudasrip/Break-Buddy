@@ -22,6 +22,8 @@ import ollama
 import pygetwindow as gw
 from pydantic import BaseModel
 
+import popup_ui   # the pixel-hero popup (popup_ui.py, same folder)
+
 try:
     ctypes.windll.shcore.SetProcessDpiAwareness(1)   # correct sizes and crisp text on high-DPI screens
 except Exception:
@@ -30,6 +32,7 @@ except Exception:
 MODEL = "gemma4:e4b"
 CONFIG_FILE = "config.json"
 TEST_MODE = False   # True: "minutes" become seconds, thresholds shrink, active hours ignored. False for real use.
+USE_HERO = True    # True: pixel hero + chat box popup. False: plain popup.
 
 if TEST_MODE:
     SAMPLE_SEC = 5            # how often to look at the active window
@@ -329,7 +332,7 @@ def dispatcher():
 # ---------------------------------------------------------------- popups
 
 open_popups = []   # visible popups, oldest first (oldest sits at the bottom)
-TITLEBAR = 45      # extra pixels for the window title bar and borders
+TITLEBAR = 45      # extra pixels for the title bar of the plain popup (the hero popup has none)
 GAP = 12           # space between stacked popups
 
 
@@ -342,29 +345,47 @@ def layout_popups():
             continue
         p.update_idletasks()
         w_px = max(p.winfo_reqwidth(), 360)
-        h_px = p.winfo_reqheight() + TITLEBAR
+        h_px = p.winfo_reqheight() + getattr(p, "_bb_titlebar", TITLEBAR)
         y -= h_px + GAP
         p.geometry(f"{w_px}x{p.winfo_reqheight()}+{sw - w_px - 20}+{y}")
 
 
-def show_popup(root, title, msg, items):
+def build_classic_popup(root, title, msg, start_snooze):
+    """Plain fallback popup, used when USE_HERO is False or the hero popup fails."""
     w = tk.Toplevel(root)
-    w.title(f"BreakBuddy - {title}")
     w.attributes("-topmost", True)
     tk.Label(w, text=title, font=("Segoe UI", 12, "bold")).pack(padx=20, pady=(12, 2))
     tk.Label(w, text=msg, wraplength=420, font=("Segoe UI", 10)).pack(padx=20, pady=4)
 
     def snooze():
         w.destroy()
-        t = threading.Timer(SNOOZE_SEC, lambda: [add_pending(i) for i in items])
-        t.daemon = True
-        t.start()
+        start_snooze()
 
     buttons = tk.Frame(w)
     buttons.pack(pady=(6, 12))
     tk.Button(buttons, text=f"Snooze {SNOOZE_LABEL}", command=snooze).pack(side="left", padx=6)
     tk.Button(buttons, text="Done", command=w.destroy).pack(side="left", padx=6)
+    return w
 
+
+def show_popup(root, title, msg, items):
+    def start_snooze():
+        t = threading.Timer(SNOOZE_SEC, lambda: [add_pending(i) for i in items])
+        t.daemon = True
+        t.start()
+
+    w = None
+    if USE_HERO:
+        try:
+            w = popup_ui.build_popup(root, title, msg, items, SNOOZE_LABEL, start_snooze)
+            w._bb_titlebar = 0
+        except Exception as e:
+            print(f"   (hero popup failed: {e}; using the plain popup instead)")
+    if w is None:
+        w = build_classic_popup(root, title, msg, start_snooze)
+        w._bb_titlebar = TITLEBAR
+
+    w.title(f"BreakBuddy - {title}")           # the window watcher ignores titles starting with "BreakBuddy"
     open_popups.append(w)
 
     def on_close(event):
@@ -374,7 +395,7 @@ def show_popup(root, title, msg, items):
 
     w.bind("<Destroy>", on_close)
     layout_popups()
-    w.after(20000, lambda: w.winfo_exists() and w.destroy())   # auto-close after 20 s
+    w.after(25000, lambda: w.winfo_exists() and w.destroy())   # auto-close after 25 s
     winsound.MessageBeep()
 
 
@@ -422,23 +443,6 @@ root = tk.Tk()
 root.title("BreakBuddy")
 root.withdraw()                            # hide the empty main window
 
-for rem in CONFIG["reminders"]:
-    threading.Thread(target=scheduler, args=(rem,), daemon=True).start()
-threading.Thread(target=dispatcher, daemon=True).start()
-threading.Thread(target=watcher, daemon=True).start()
-start_tray()
-
-print("BreakBuddy running with:")
-print(f"  personality: {CONFIG.get('personality')}")
-print(f"  active hours: {CONFIG['active_from']} to {CONFIG['active_to']}"
-      + ("  (ignored in TEST_MODE)" if TEST_MODE else ""))
-for r in CONFIG["reminders"]:
-    print(f"  - {r['name']}: every {r['every_min']} {'sec (test)' if TEST_MODE else 'min'}")
-print(f"  long-break nudge after {LONG_AFTER_SEC // 60} min of continuous screen time"
-      + ("  (test)" if TEST_MODE else ""))
-print("  tray icon: right-click it (check the ^ arrow near the clock) to pause or quit")
-print("Window log (what the model thinks you are doing):")
-
 
 def poll():
     if quit_event.is_set():
@@ -450,5 +454,28 @@ def poll():
     root.after(500, poll)
 
 
-poll()
-root.mainloop()
+def main():
+    for rem in CONFIG["reminders"]:
+        threading.Thread(target=scheduler, args=(rem,), daemon=True).start()
+    threading.Thread(target=dispatcher, daemon=True).start()
+    threading.Thread(target=watcher, daemon=True).start()
+    start_tray()
+
+    print("BreakBuddy running with:")
+    print(f"  personality: {CONFIG.get('personality')}")
+    print(f"  active hours: {CONFIG['active_from']} to {CONFIG['active_to']}"
+          + ("  (ignored in TEST_MODE)" if TEST_MODE else ""))
+    for r in CONFIG["reminders"]:
+        print(f"  - {r['name']}: every {r['every_min']} {'sec (test)' if TEST_MODE else 'min'}")
+    print(f"  long-break nudge after {LONG_AFTER_SEC // 60} min of continuous screen time"
+          + ("  (test)" if TEST_MODE else ""))
+    print(f"  popup style: {'pixel hero' if USE_HERO else 'plain'}")
+    print("  tray icon: right-click it (check the ^ arrow near the clock) to pause or quit")
+    print("Window log (what the model thinks you are doing):")
+
+    poll()
+    root.mainloop()
+
+
+if __name__ == "__main__":
+    main()

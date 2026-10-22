@@ -1,1 +1,7 @@
-venv
+# virtual environment and Python cache
+venv/
+__pycache__/
+*.pyc
+
+# personal settings made by setup.py
+config.json
