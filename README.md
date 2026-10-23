@@ -184,7 +184,7 @@ If you replace the sprite with your own, update `TIP` in `make_sprite.py` and `H
 
 ## Write-up
 
-DEV post: 
+DEV post: [Write-up](https://dev.to/kumuda/i-built-a-pixel-hero-that-nags-me-to-drink-water-and-runs-100-on-my-laptop-2ilb)
 
 ## Credits
 
