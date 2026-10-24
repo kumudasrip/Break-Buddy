@@ -2,8 +2,6 @@
 
 **A lazy-person's break reminder that runs entirely on your own laptop.** You tell it what you need in one plain-English sentence, a local open-weight model (Gemma 4 through Ollama) sets everything up, and a pixel-art hero pops up at the right moments to tell you to drink water, rest your eyes, or stretch. It writes a fresh message every time, in whatever personality you picked, and it knows when *not* to bother you, like during a video call.
 
-Built for the **Hacktoberfest 2026 Open-Source AI Challenge, Week 3: "Slow and Steady"**
-
  <table>
   <tr>
     <td><img src="https://github.com/user-attachments/assets/0ba32f94-4482-4f15-b99c-0e4f9a235b93" width="400"></td>
@@ -190,7 +188,6 @@ DEV post: [Write-up](https://dev.to/kumuda/i-built-a-pixel-hero-that-nags-me-to-
 
 - [Ollama](https://ollama.com) for running models locally
 - [Gemma](https://ai.google.dev/gemma), Google's open-weight model family
-- Built for the [Hacktoberfest 2026 Open-Source AI Challenge](https://dev.to/challenges/hacktoberfest-week3-2026-10-19) on DEV
 
 ## License
 
